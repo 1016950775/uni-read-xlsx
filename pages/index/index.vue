@@ -3,7 +3,7 @@
 		<image class="logo" src="/static/logo.png" @click="go"></image>
 		<view class="text-area">
 			<text class="title">js-xlsx:https://www.npmjs.com/package/js-xlsx</text>
-			<text>点击图片</text>
+			<text>点击图片上传</text>
 			<!-- <excel @getResult="getMyExcelData1"></excel> -->
 		</view>
 
