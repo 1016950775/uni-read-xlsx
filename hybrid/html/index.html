@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<!-- <script src="https://unpkg.com/vue@next"></script> -->
+		<script src="js/v3.2.8/vue.global.prod.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/uni.js" type="text/javascript"></script>
+		<script src="js/xlsx/dist/xlsx.core.min.js" type="text/javascript"></script>
+	</head>
+	<body>
+		<div id="app">
+			<input style="display: none" class="input-file" type="file" @change="exportData"
+				accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+			<button @click="btnClick">导入报告</button>
+		</div>
+
+		<script type="text/javascript">
+			// import XLSX from "js/xlsx";
+			const App = {
+				data() {
+					return {
+						counter: 0
+					}
+				},
+				methods: {
+					btnClick() {
+						// 点击事件
+						document.querySelector(".input-file").click();
+					},
+					exportData(event) {
+						console.log(event,"123")
+						if (!event.currentTarget.files.length) {
+							return;
+						}
+						
+						// const that = this;
+						// 拿取文件对象
+						var f = event.currentTarget.files[0];
+						// 用FileReader来读取
+						var reader = new FileReader();
+						// 重写FileReader上的readAsBinaryString方法
+						FileReader.prototype.readAsBinaryString = function(f) {
+							var binary = "";
+							var wb; // 读取完成的数据
+							var outdata; // 你需要的数据
+							var outhtml; //html类型数据
+							var reader = new FileReader();
+							reader.onload = function() {
+								
+								// 读取成Uint8Array，再转换为Unicode编码（Unicode占两个字节）
+								var bytes = new Uint8Array(reader.result);
+								var length = bytes.byteLength;
+								for (var i = 0; i < length; i++) {
+									binary += String.fromCharCode(bytes[i]);
+								}
+								// 接下来就是xlsx了，具体可看api
+								wb = XLSX.read(binary, {
+									type: "binary",
+								});
+								outhtml = XLSX.utils.sheet_to_html(wb.Sheets[wb.SheetNames[0]]);
+								// outdata = XLSX.utils.sheet_to_formulae(wb.Sheets[wb.SheetNames[0]]);
+								outdata = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+								// 自定义方法向父组件传递数据
+								console.log(outdata)
+								console.log(outhtml)
+								uni.postMessage({
+									data: {
+										action: "message",
+										info: [outdata, outhtml],
+									},
+								});
+							};
+							reader.readAsArrayBuffer(f);
+						};
+						reader.readAsBinaryString(f);
+					},
+				}
+			};
+			Vue.createApp(App).mount('#app');
+		</script>
+	</body>
+</html>
